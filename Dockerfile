@@ -1,11 +1,22 @@
-# Menggunakan image NodeJS versi 20
-FROM node:20
-# Menetapkan folder kerja di dalam container
+FROM node:lts-alpine
+
+# install simple http server for serving static content
+RUN npm install -g http-server
+
+# make the 'app' folder the current working directory
 WORKDIR /app
-# Menyalin file aplikasi ke dalam container
-COPY . /app
 
+# copy both 'package.json' and 'package-lock.json' (if available)
+COPY package*.json ./
 
+# install project dependencies
+RUN npm install
 
-# Perintah yang akan dijalankan ketika container dimulai
-CMD ["node", "index.html"]
+# copy project files and folders to the current working directory (i.e. 'app' folder)
+COPY . .
+
+# build app for production with minification
+RUN npm run build
+
+EXPOSE 8080
+CMD [ "http-server", "dist" ]
